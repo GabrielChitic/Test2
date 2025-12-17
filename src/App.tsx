@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 
 type Category = 'Health' | 'Work' | 'Mental Health' | 'Others'
+type Theme = 'light' | 'dark'
 
 interface Todo {
   id: number
@@ -29,6 +30,22 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState<Category>('Health')
   const [selectedTime, setSelectedTime] = useState('')
   const [currentView, setCurrentView] = useState<'tasks' | 'calendar'>('tasks')
+  const [theme, setTheme] = useState<Theme>('light')
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as Theme | null
+    if (savedTheme) {
+      setTheme(savedTheme)
+      document.documentElement.setAttribute('data-theme', savedTheme)
+    }
+  }, [])
+
+  const toggleTheme = () => {
+    const newTheme: Theme = theme === 'light' ? 'dark' : 'light'
+    setTheme(newTheme)
+    document.documentElement.setAttribute('data-theme', newTheme)
+    localStorage.setItem('theme', newTheme)
+  }
 
   const getCategoryInfo = (): CategoryInfo[] => {
     const categories: Category[] = ['Health', 'Work', 'Mental Health', 'Others']
@@ -90,71 +107,88 @@ function App() {
 
   return (
     <div className="app">
-      <div className="header">
-        <h1>{currentView === 'tasks' ? 'Tasks' : 'Calendar'} <span className="date">{currentDate}</span></h1>
-        <div className="view-toggle">
-          <button
-            className={currentView === 'tasks' ? 'active' : ''}
-            onClick={() => setCurrentView('tasks')}
-          >
-            Tasks
-          </button>
-          <button
-            className={currentView === 'calendar' ? 'active' : ''}
-            onClick={() => setCurrentView('calendar')}
-          >
-            Calendar
+      <div className="app-header">
+        <div className="header-content">
+          <h1>Task Management</h1>
+          <div className="header-subtitle">
+            {currentDate} • {todos.length} tasks • {todos.filter(t => t.completed).length} completed
+          </div>
+        </div>
+        <div className="header-actions">
+          <button className="theme-toggle" onClick={toggleTheme} title="Toggle theme">
+            {theme === 'light' ? '🌙' : '☀️'}
           </button>
         </div>
+      </div>
+
+      <div className="tabs-container">
+        <button
+          className={`tab-button ${currentView === 'tasks' ? 'active' : ''}`}
+          onClick={() => setCurrentView('tasks')}
+        >
+          📋 Tasks
+        </button>
+        <button
+          className={`tab-button ${currentView === 'calendar' ? 'active' : ''}`}
+          onClick={() => setCurrentView('calendar')}
+        >
+          📅 Calendar
+        </button>
       </div>
 
       {currentView === 'tasks' ? (
         <>
           <div className="category-grid">
             {categoryInfo.map(cat => (
-              <div key={cat.name} className="category-card" style={{ backgroundColor: cat.color + '20' }}>
-                <div className="category-icon" style={{ backgroundColor: cat.color }}>
-                  {cat.icon}
-                </div>
-                <div className="category-info">
-                  <div className="category-count">{cat.count}</div>
-                  <div className="category-name">{cat.name}</div>
+              <div key={cat.name} className="category-card">
+                <div className="category-card-header">
+                  <div className="category-icon">
+                    {cat.icon}
+                  </div>
+                  <div>
+                    <div className="category-count">{cat.count}</div>
+                    <div className="category-name">{cat.name}</div>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="add-task-section">
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Add a new task..."
-              className="task-input"
-            />
-            <div className="task-options">
+          <div className="form-section">
+            <div className="form-title">Add New Task</div>
+            <div className="form-row">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Task description..."
+                className="input"
+              />
+            </div>
+            <div className="form-row">
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value as Category)}
-                className="category-select"
+                className="select"
               >
-                <option value="Health">Health</option>
-                <option value="Work">Work</option>
-                <option value="Mental Health">Mental Health</option>
-                <option value="Others">Others</option>
+                <option value="Health">💊 Health</option>
+                <option value="Work">💼 Work</option>
+                <option value="Mental Health">🧠 Mental Health</option>
+                <option value="Others">📋 Others</option>
               </select>
               <input
                 type="time"
                 value={selectedTime}
                 onChange={(e) => setSelectedTime(e.target.value)}
-                className="time-input"
+                className="input"
+                placeholder="Time (optional)"
               />
-              <button onClick={addTodo} className="add-btn">+ Add</button>
+              <button onClick={addTodo} className="btn btn-primary">+ Add Task</button>
             </div>
           </div>
 
-          <div className="tasks-list">
+          <div className="task-list">
             {todos.map(todo => (
               <div key={todo.id} className="task-item">
                 <input
@@ -164,20 +198,27 @@ function App() {
                   className="task-checkbox"
                 />
                 <div className="task-content">
-                  <div className="task-text">{todo.text}</div>
-                  <div className="task-category" style={{
-                    color: categoryInfo.find(c => c.name === todo.category)?.color
-                  }}>
-                    {todo.category.toUpperCase()}
+                  <div className="task-title">{todo.text}</div>
+                  <div className="task-meta">
+                    <span className="task-badge">
+                      {categoryInfo.find(c => c.name === todo.category)?.icon} {todo.category}
+                    </span>
+                    {todo.time && (
+                      <span className="task-time">
+                        🕒 {todo.time}
+                      </span>
+                    )}
                   </div>
                 </div>
-                <button onClick={() => deleteTodo(todo.id)} className="delete-btn">×</button>
+                <button onClick={() => deleteTodo(todo.id)} className="task-delete">
+                  ×
+                </button>
               </div>
             ))}
           </div>
         </>
       ) : (
-        <div className="calendar-view">
+        <div className="calendar-container">
           <div className="week-selector">
             {[25, 26, 27, 28, 29].map(day => (
               <div key={day} className={`day-chip ${day === 26 ? 'active' : ''}`}>
@@ -188,18 +229,12 @@ function App() {
           </div>
 
           <div className="timeline">
-            {['6:00', '7:00', '8:00', '9:00', '10:00', '11:00', '12:00'].map(time => (
+            {['6:00', '7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'].map(time => (
               <div key={time} className="time-slot">
                 <div className="time-label">{time}</div>
                 <div className="time-events">
                   {todos.filter(t => t.time === time).map(todo => (
-                    <div
-                      key={todo.id}
-                      className="calendar-event"
-                      style={{
-                        backgroundColor: categoryInfo.find(c => c.name === todo.category)?.color
-                      }}
-                    >
+                    <div key={todo.id} className="calendar-event">
                       {categoryInfo.find(c => c.name === todo.category)?.icon} {todo.text}
                     </div>
                   ))}
