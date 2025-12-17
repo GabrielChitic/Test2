@@ -1,7 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
 #root {
   max-width: 600px;
   margin: 0 auto;
   padding: 2rem;
+  font-family: 'Poppins', sans-serif;
 }
 
 .app {
@@ -12,6 +15,7 @@
   color: #646cff;
   margin-bottom: 2rem;
   font-size: 2.5rem;
+  font-weight: 700;
 }
 
 .input-container {
@@ -48,6 +52,22 @@
 
 .add-button:hover {
   background-color: #535bf2;
+}
+
+.priority-select {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+  background-color: white;
+  transition: border-color 0.2s;
+}
+
+.priority-select:focus {
+  border-color: #646cff;
 }
 
 .todos-list {
@@ -112,6 +132,42 @@
 
 .delete-button:hover {
   background-color: #cc0000;
+}
+
+.priority-badge {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: 12px;
+  letter-spacing: 0.5px;
+}
+
+.priority-badge.priority-low {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.priority-badge.priority-medium {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.priority-badge.priority-high {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+.todo-item.priority-low {
+  border-left: 4px solid #1976d2;
+}
+
+.todo-item.priority-medium {
+  border-left: 4px solid #f57c00;
+}
+
+.todo-item.priority-high {
+  border-left: 4px solid #d32f2f;
 }
 
 .stats {

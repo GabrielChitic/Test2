@@ -1,15 +1,19 @@
 import { useState } from 'react'
 import './App.css'
 
+type Priority = 'low' | 'medium' | 'high'
+
 interface Todo {
   id: number
   text: string
   completed: boolean
+  priority: Priority
 }
 
 function App() {
   const [todos, setTodos] = useState<Todo[]>([])
   const [inputValue, setInputValue] = useState('')
+  const [priority, setPriority] = useState<Priority>('medium')
 
   const addTodo = () => {
     if (inputValue.trim() === '') return
@@ -17,11 +21,13 @@ function App() {
     const newTodo: Todo = {
       id: Date.now(),
       text: inputValue,
-      completed: false
+      completed: false,
+      priority: priority
     }
 
     setTodos([...todos, newTodo])
     setInputValue('')
+    setPriority('medium')
   }
 
   const toggleTodo = (id: number) => {
@@ -53,6 +59,15 @@ function App() {
           placeholder="Add a new task..."
           className="todo-input"
         />
+        <select
+          value={priority}
+          onChange={(e) => setPriority(e.target.value as Priority)}
+          className="priority-select"
+        >
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
         <button onClick={addTodo} className="add-button">
           Add
         </button>
@@ -63,7 +78,7 @@ function App() {
           <p className="empty-message">No tasks yet. Add one above!</p>
         ) : (
           todos.map(todo => (
-            <div key={todo.id} className={`todo-item ${todo.completed ? 'completed' : ''}`}>
+            <div key={todo.id} className={`todo-item ${todo.completed ? 'completed' : ''} priority-${todo.priority}`}>
               <input
                 type="checkbox"
                 checked={todo.completed}
@@ -71,6 +86,9 @@ function App() {
                 className="todo-checkbox"
               />
               <span className="todo-text">{todo.text}</span>
+              <span className={`priority-badge priority-${todo.priority}`}>
+                {todo.priority}
+              </span>
               <button onClick={() => deleteTodo(todo.id)} className="delete-button">
                 Delete
               </button>
