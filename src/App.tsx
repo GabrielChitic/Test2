@@ -30,7 +30,7 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState<Category>('Health')
   const [selectedTime, setSelectedTime] = useState('')
   const [currentView, setCurrentView] = useState<'tasks' | 'calendar'>('tasks')
-  const [theme, setTheme] = useState<Theme>('light')
+  const [theme, setTheme] = useState<Theme>('dark')
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as Theme | null
